@@ -1,0 +1,33 @@
+# Use an NVIDIA CUDA base image with Python for GPU support
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu20.04
+
+# Set working directory inside the container
+WORKDIR /app
+
+# Install system dependencies and Python
+RUN apt-get update && apt-get install -y \
+    python3.8 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.8 as the default python3
+RUN ln -s /usr/bin/python3.8 /usr/bin/python
+
+# Copy the requirements file into the container
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the entire project into the container
+COPY . .
+
+# Expose the Flask port (default: 5000)
+EXPOSE 5000
+
+# Set environment variables for Flask
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+
+# Command to run the Flask server
+CMD ["flask", "run", "--host=0.0.0.0"]
